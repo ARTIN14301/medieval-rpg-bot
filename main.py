@@ -5,12 +5,14 @@
 
 import logging
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackQueryHandler, ContextTypes
 
 from config import Config
 from database.db import init_database, get_session
-from handlers.register import register_start, handle_name_input, class_callback, cancel_register
 from database.schema import User
+
+# ===== اضافه کردن هندلر ثبت‌نام =====
+from handlers.register import register_start, handle_name_input, class_callback, cancel_register
 
 # ============================================
 # تنظیمات لاگینگ
@@ -23,28 +25,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ============================================
-# دکوریتور بررسی ثبت‌نام
-# ============================================
-
-def require_registered(func):
-    """دکوریتور برای چک کردن ثبت‌نام کاربر"""
-    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
-        user_id = str(update.effective_user.id)
-        session = get_session()
-        user = session.query(User).filter_by(telegram_id=user_id).first()
-        session.close()
-        
-        if not user:
-            await update.message.reply_text(
-                "❌ اول باید با /register ثبت‌نام کنی!"
-            )
-            return
-        
-        return await func(update, context, user, *args, **kwargs)
-    return wrapper
-
-# ============================================
-# کامندها
+# کامند start
 # ============================================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -54,24 +35,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "یک دنیای فانتزی قرون وسطایی منتظر توست.\n\n"
         "📋 **برای شروع:**\n"
         "• `/register` - ثبت‌نام در بازی\n"
-        "• `/profile` - مشاهده پروفایل\n"
-        "• `/help` - راهنمای کامل\n\n"
+        "• `/profile` - مشاهده پروفایل\n\n"
         "🔥 **آماده‌ای که به یک افسانه تبدیل شی؟**"
     )
 
-async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """کامند register - ثبت‌نام کاربر"""
-    # فعلاً ساده - بعداً کامل می‌شه
-    await update.message.reply_text(
-        "📝 **مرحله ۱: انتخاب اسم**\n\n"
-        "یک اسم برای شخصیتت انتخاب کن:\n"
-        "• حداکثر ۱۵ حرف\n"
-        "• فقط حروف انگلیسی و اعداد و _\n\n"
-        "مثال: `ArashTheGreat`"
-    )
-
 # ============================================
-# هندلرهای فارسی (بدون /)
+# کامندهای فارسی (بدون /)
 # ============================================
 
 async def handle_farsi_commands(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -81,10 +50,12 @@ async def handle_farsi_commands(update: Update, context: ContextTypes.DEFAULT_TY
     if text == "شروع":
         await start(update, context)
     elif text == "ثبت‌نام":
-        await register_start(update, context)  # <-- این خط جدید
+        await register_start(update, context)
     elif text == "لغو":
-        await cancel_register(update, context)  # <-- این خط جدید
-    # و بقیه کامندها...
+        await cancel_register(update, context)
+    else:
+        # اگه هیچکدوم نبود، نادیده بگیر
+        pass
 
 # ============================================
 # اجرا
@@ -102,20 +73,25 @@ def main():
     
     # ===== کامندهای انگلیسی (با /) =====
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("register", register_start))  # <-- این خط رو عوض کن
-    app.add_handler(CommandHandler("cancel", cancel_register))   # <-- این خط جدید
+    app.add_handler(CommandHandler("register", register_start))
+    app.add_handler(CommandHandler("cancel", cancel_register))
     
-    # بقیه کامندها اضافه می‌شن...
+    # ===== کالبک‌ها (دکمه‌ها) =====
+    app.add_handler(CallbackQueryHandler(class_callback, pattern="^class_"))
+    
+    # ===== هندلر اسم (برای دریافت اسم در ثبت‌نام) =====
+    # این هندلر فقط وقتی کار می‌کنه که کاربر توی حالت waiting_for_name باشه
+    app.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_name_input),
+        group=1
+    )
     
     # ===== کامندهای فارسی (بدون /) =====
+    app.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_farsi_commands),
+        group=2
+    )
     
-    app.add_handler(MessageHandler(
-        filters.TEXT & ~filters.COMMAND,
-        handle_farsi_commands
-    ))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_name_input), group=10)  # <-- این خط جدید
-```
-    app.add_handler(CallbackQueryHandler(class_callback, pattern="^class_"))  # <-- این خط جدید
     # ===== اجرا =====
     logger.info("🚀 بات روشن شد!")
     app.run_polling()
