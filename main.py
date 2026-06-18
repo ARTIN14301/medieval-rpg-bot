@@ -9,6 +9,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 
 from config import Config
 from database.db import init_database, get_session
+from handlers.register import register_start, handle_name_input, class_callback, cancel_register
 from database.schema import User
 
 # ============================================
@@ -80,7 +81,9 @@ async def handle_farsi_commands(update: Update, context: ContextTypes.DEFAULT_TY
     if text == "شروع":
         await start(update, context)
     elif text == "ثبت‌نام":
-        await register(update, context)
+        await register_start(update, context)  # <-- این خط جدید
+    elif text == "لغو":
+        await cancel_register(update, context)  # <-- این خط جدید
     # و بقیه کامندها...
 
 # ============================================
@@ -99,15 +102,20 @@ def main():
     
     # ===== کامندهای انگلیسی (با /) =====
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("register", register))
+    app.add_handler(CommandHandler("register", register_start))  # <-- این خط رو عوض کن
+    app.add_handler(CommandHandler("cancel", cancel_register))   # <-- این خط جدید
+    
     # بقیه کامندها اضافه می‌شن...
     
     # ===== کامندهای فارسی (بدون /) =====
+    
     app.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND,
         handle_farsi_commands
     ))
-    
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_name_input), group=10)  # <-- این خط جدید
+```
+    app.add_handler(CallbackQueryHandler(class_callback, pattern="^class_"))  # <-- این خط جدید
     # ===== اجرا =====
     logger.info("🚀 بات روشن شد!")
     app.run_polling()
