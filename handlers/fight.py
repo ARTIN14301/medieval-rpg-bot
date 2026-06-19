@@ -17,9 +17,6 @@ from config import Config
 
 logger = logging.getLogger(__name__)
 
-# ============================================
-# دیکشنری ساده برای پنل‌های فعال (فقط در حافظه)
-# ============================================
 active_panels = {}
 
 # ============================================
@@ -44,7 +41,6 @@ async def solofight(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     session.close()
     
-    # ساخت پنل
     keyboard = [
         [InlineKeyboardButton("🏘️ روستاها (لول ۱+)", callback_data="fight_village")],
         [InlineKeyboardButton("⚔️ ارتش‌ها (لول ۷+)", callback_data="fight_army")],
@@ -89,6 +85,44 @@ async def fight_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("🚪 **پنل جنگ بسته شد.**", parse_mode="HTML")
         return
     
+    # برگشت به پنل اصلی
+    if action == "fight_back":
+        # دوباره پنل اصلی رو نشون بده
+        session = get_session()
+        user = session.query(User).filter_by(telegram_id=user_id).first()
+        session.close()
+        
+        if not user:
+            await query.edit_message_text("❌ **خطا!**", parse_mode="HTML")
+            if user_id in active_panels:
+                del active_panels[user_id]
+            return
+        
+        keyboard = [
+            [InlineKeyboardButton("🏘️ روستاها (لول ۱+)", callback_data="fight_village")],
+            [InlineKeyboardButton("⚔️ ارتش‌ها (لول ۷+)", callback_data="fight_army")],
+            [InlineKeyboardButton("👹 هیولاها (لول ۱۵+)", callback_data="fight_monster")],
+            [InlineKeyboardButton("❌ بستن پنل", callback_data="fight_close")]
+        ]
+        
+        text = (
+            f"⚔️ **سالن جنگ** ⚔️\n\n"
+            f"🔹 لول: {user.level}\n"
+            f"⚡ قدرت: {get_user_power(user)}\n"
+            f"💨 سرعت: {get_user_speed(user)}%\n\n"
+            f"📋 **دسته‌های موجود:**\n"
+            f"🟢 روستاها (لول ۱+)    ⏳ ۳۰ دقیقه\n"
+            f"🟡 ارتش‌ها (لول ۷+)    ⏳ ۴۵ دقیقه\n"
+            f"🔴 هیولاها (لول ۱۵+)   ⏳ ۶۰ دقیقه"
+        )
+        
+        await query.edit_message_text(
+            text,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode="HTML"
+        )
+        return
+    
     # چک کردن مالکیت پنل
     if user_id not in active_panels:
         await query.edit_message_text("❌ **این پنل منقضی شده!**", parse_mode="HTML")
@@ -100,7 +134,8 @@ async def fight_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # نمایش سطوح
     rewards = Config.FIGHT_REWARDS.get(fight_type, {})
     if not rewards:
-        await query.edit_message_text("❌ **نوع جنگ نامعتبر!**", parse_mode="HTML")
+        await query.edit_message_text(f"❌ **نوع جنگ `{fight_type}` نامعتبر!**", parse_mode="HTML")
+        # پنل رو پاک نکن، فقط خطا نشون بده
         return
     
     keyboard = []
@@ -133,8 +168,12 @@ async def fight_level_callback(update: Update, context: ContextTypes.DEFAULT_TYP
         await query.edit_message_text("❌ **پنل منقضی شده!**", parse_mode="HTML")
         return
     
-    _, fight_type, level = query.data.split("_")
-    level = int(level)
+    try:
+        _, fight_type, level = query.data.split("_")
+        level = int(level)
+    except ValueError:
+        await query.edit_message_text("❌ **خطا در دریافت اطلاعات!**", parse_mode="HTML")
+        return
     
     session = get_session()
     user = session.query(User).filter_by(telegram_id=user_id).first()
@@ -142,6 +181,8 @@ async def fight_level_callback(update: Update, context: ContextTypes.DEFAULT_TYP
     if not user:
         await query.edit_message_text("❌ **خطا!**", parse_mode="HTML")
         session.close()
+        if user_id in active_panels:
+            del active_panels[user_id]
         return
     
     # محاسبه قدرت
@@ -159,7 +200,6 @@ async def fight_level_callback(update: Update, context: ContextTypes.DEFAULT_TYP
     if win:
         user.gold += gold
         user.exp += exp
-        # لول‌آپ
         while user.exp >= user.exp_needed:
             user.exp -= user.exp_needed
             user.level += 1
