@@ -16,6 +16,7 @@ from utils.messages import (
     get_register_success_message,
     get_class_keyboard
 )
+from utils.helpers import escape_markdown
 from config import Config
 
 logger = logging.getLogger(__name__)
@@ -23,10 +24,12 @@ logger = logging.getLogger(__name__)
 waiting_for_name = {}
 
 async def reply(update: Update, text: str):
-    await update.message.reply_text(text, parse_mode="MarkdownV2")
+    """ارسال پیام با MarkdownV2 و Escape خودکار"""
+    await update.message.reply_text(escape_markdown(text), parse_mode="MarkdownV2")
 
 async def reply_callback(query, text: str):
-    await query.edit_message_text(text, parse_mode="MarkdownV2")
+    """ویرایش پیام با MarkdownV2 و Escape خودکار"""
+    await query.edit_message_text(escape_markdown(text), parse_mode="MarkdownV2")
 
 # ============================================
 # ۱. شروع ثبت‌نام
@@ -84,7 +87,7 @@ async def handle_name_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     del waiting_for_name[user_id]
     
     await update.message.reply_text(
-        get_register_class_message(),
+        escape_markdown(get_register_class_message()),
         reply_markup=InlineKeyboardMarkup(get_class_keyboard()),
         parse_mode="MarkdownV2"
     )
