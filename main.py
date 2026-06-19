@@ -16,17 +16,24 @@ from utils.messages import get_start_message
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+async def reply(update: Update, text: str):
+    """ارسال پیام با MarkdownV2"""
+    await update.message.reply_text(text, parse_mode="MarkdownV2")
+
+async def reply_callback(query, text: str):
+    """ویرایش پیام با MarkdownV2"""
+    await query.edit_message_text(text, parse_mode="MarkdownV2")
+
 # ============================================
 # کامند start
 # ============================================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(get_start_message())
+    await reply(update, get_start_message())
 
 # ============================================
 # کامندهای فارسی (بدون /)
 # ============================================
 async def farsi_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """پردازش کامندهای فارسی (بدون اسلش)"""
     text = update.message.text.strip()
     
     if text == "شروع":
@@ -49,28 +56,17 @@ def main():
     
     app = Application.builder().token(Config.BOT_TOKEN).build()
     
-    # ===== کامندهای انگلیسی =====
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("register", register_start))
     app.add_handler(CommandHandler("cancel", cancel_register))
     app.add_handler(CommandHandler("chosearmy", chosearmy))
     app.add_handler(CommandHandler("leavearmy", leavearmy))
     
-    # ===== کالبک‌ها =====
     app.add_handler(CallbackQueryHandler(class_callback, pattern="^class_"))
     app.add_handler(CallbackQueryHandler(army_callback, pattern="^army_"))
     
-    # ===== هندلر اسم (برای ثبت‌نام) =====
-    app.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_name_input),
-        group=1
-    )
-    
-    # ===== هندلر کامندهای فارسی =====
-    app.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, farsi_handler),
-        group=2
-    )
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_name_input), group=1)
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, farsi_handler), group=2)
     
     logger.info("🚀 بات روشن شد!")
     app.run_polling()
