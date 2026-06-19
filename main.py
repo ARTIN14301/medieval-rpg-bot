@@ -12,18 +12,17 @@ from database.db import init_database
 from handlers.register import register_start, handle_name_input, class_callback, cancel_register
 from handlers.army import chosearmy, army_callback, leavearmy
 from utils.messages import get_start_message
-from utils.helpers import escape_markdown
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 async def reply(update: Update, text: str):
-    """ارسال پیام با MarkdownV2 و Escape خودکار"""
-    await update.message.reply_text(escape_markdown(text), parse_mode="MarkdownV2")
+    """ارسال پیام با HTML"""
+    await update.message.reply_text(text, parse_mode="HTML")
 
 async def reply_callback(query, text: str):
-    """ویرایش پیام با MarkdownV2 و Escape خودکار"""
-    await query.edit_message_text(escape_markdown(text), parse_mode="MarkdownV2")
+    """ویرایش پیام با HTML"""
+    await query.edit_message_text(text, parse_mode="HTML")
 
 # ============================================
 # کامند start
