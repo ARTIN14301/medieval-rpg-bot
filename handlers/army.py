@@ -129,7 +129,7 @@ async def army_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def leavearmy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    خروج از ارتش فعلی
+    خروج از ارتش فعلی با کول‌داون ۴۸ ساعته
     """
     user_id = str(update.effective_user.id)
     logger.info(f"🔵 leavearmy called for user {user_id}")
@@ -154,6 +154,21 @@ async def leavearmy(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
     
+    # ===== چک کردن کول‌داون خروج (۴۸ ساعت) =====
+    if user.army_join_time:
+        cooldown_hours = Config.ARMY_CHANGE_COOLDOWN / 3600
+        time_passed = (datetime.utcnow() - user.army_join_time).total_seconds() / 3600
+        
+        if time_passed < cooldown_hours:
+            remaining = cooldown_hours - time_passed
+            await update.message.reply_text(
+                f"⏳ **صبر کن!**\n\n"
+                f"تازه به ارتش پیوستی!\n"
+                f"⏱️ **{remaining:.1f} ساعت** دیگه می‌تونی خارج شی.\n\n"
+                f"🛡️ فعلاً با هم‌رزمانت بجنگ!"
+            )
+            return
+    
     # ===== خروج از ارتش =====
     session = get_session()
     user = session.query(User).filter_by(telegram_id=user_id).first()
@@ -163,7 +178,9 @@ async def leavearmy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session.close()
     
     await update.message.reply_text(
-        get_army_leave_success_message()
+        "❌⚔️ **تو از ارتش خارج شدی!** ⚔️❌\n\n"
+        "🛡️ حالا بدون ارتش هستی.\n"
+        "🔹 با `/chosearmy` می‌تونی دوباره به یک ارتش بپیوندی."
     )
 
 # ============================================
