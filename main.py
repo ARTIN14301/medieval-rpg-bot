@@ -13,6 +13,7 @@ from handlers.register import register_start, handle_name_input, class_callback,
 from handlers.army import chosearmy, army_callback, leavearmy
 from utils.messages import get_start_message
 from handlers.profile import profile
+from handlers.fight import solofight, fight_callback, fight_level_callback
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -50,6 +51,8 @@ async def farsi_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await leavearmy(update, context)
     elif text == "پروفایل":
         await profile(update, context)
+    elif text == "جنگ":
+        await solofight(update, context)    
 
 # ============================================
 # اجرا
@@ -68,10 +71,13 @@ def main():
     app.add_handler(CommandHandler("profile", profile))
     app.add_handler(CallbackQueryHandler(class_callback, pattern="^class_"))
     app.add_handler(CallbackQueryHandler(army_callback, pattern="^army_"))
+    app.add_handler(CommandHandler("solofight", solofight))
     
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_name_input), group=1)
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, farsi_handler), group=2)
-    
+    app.add_handler(CallbackQueryHandler(fight_callback, pattern="^fight_"))
+    app.add_handler(CallbackQueryHandler(fight_level_callback, pattern="^fight_level_"))
+
     logger.info("🚀 بات روشن شد!")
     app.run_polling()
 
