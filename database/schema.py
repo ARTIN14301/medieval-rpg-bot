@@ -47,7 +47,7 @@ class User(Base):
     
     # کلن
     clan_id = Column(Integer, ForeignKey("clans.id"), nullable=True)
-    clan = relationship("Clan", back_populates="members")
+    clan = relationship("Clan", foreign_keys=[clan_id], back_populates="members")
     clan_join_date = Column(DateTime, nullable=True)
     
     # اینونتوری (رابطه)
