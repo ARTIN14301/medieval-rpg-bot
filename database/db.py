@@ -6,7 +6,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from config import Config
-from database.schema import Base, init_db
+from database.schema import Base,
 
 # ایجاد engine
 engine = create_engine(Config.DATABASE_URL)
@@ -19,6 +19,5 @@ def get_session():
     return SessionLocal()
 
 def init_database():
-    """ایجاد همه جدول‌ها در دیتابیس"""
-    init_db()
+    Base.metadata.create_all(engine)
     print("✅ دیتابیس با موفقیت ساخته شد!")
