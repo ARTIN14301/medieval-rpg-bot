@@ -14,7 +14,7 @@ class Config:
     # ۱. تنظیمات اصلی بات
     # ========================================
     
-    BOT_TOKEN = os.getenv("BOT_TOKEN", "8535219651:AAFBjrxvaRJCfFuu3NQInAooMwhY5zz9OEY")
+    BOT_TOKEN = os.getenv("BOT_TOKEN")
     ADMIN_ID = int(os.getenv("ADMIN_ID", 5596656149))
     
     # ========================================
