@@ -87,17 +87,14 @@ def get_random_quests(count=3):
 
 
 
-# utils/helpers.py
-# ============================================
-# توابع کمکی
-# ============================================
-
-
-
 def escape_markdown(text: str) -> str:
     """
-    Escape کردن کاراکترهای خاص MarkdownV2
-    کاراکترهای خاص: _ * [ ] ( ) ~ ` > # + - = | { } . !
+    Escape کردن همه کاراکترهای خاص MarkdownV2
     """
-    escape_chars = r'_*[]()~`>#+-=|{}.!'  # <-- ! رو اضافه کردم
-    return re.sub(r'([{}])'.format(re.escape(escape_chars)), r'\\\1', text)
+    # لیست کامل کاراکترهای خاص
+    special_chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
+    
+    for char in special_chars:
+        text = text.replace(char, f'\\{char}')
+    
+    return text
