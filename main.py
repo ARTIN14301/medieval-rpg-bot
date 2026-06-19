@@ -34,6 +34,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ============================================
 # کامندهای فارسی (بدون /)
 # ============================================
+
 async def farsi_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip()
     
@@ -48,8 +49,8 @@ async def farsi_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif text == "خروج":
         await leavearmy(update, context)
     elif text == "پروفایل":
-    await profile(update, context)
-    
+        await profile(update, context)
+
 # ============================================
 # اجرا
 # ============================================
