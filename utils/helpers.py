@@ -4,6 +4,7 @@
 # ============================================
 
 import random
+import re
 from datetime import datetime, timedelta
 from utils.constants import get_title, ITEMS, ARMIES, CLASSES
 
@@ -77,3 +78,18 @@ def get_random_quests(count=3):
     """دریافت کوئست‌های تصادفی"""
     from utils.constants import QUESTS
     return random.sample(QUESTS, min(count, len(QUESTS)))
+
+
+# utils/helpers.py
+# ============================================
+# توابع کمکی
+# ============================================
+
+
+def escape_markdown(text: str) -> str:
+    """
+    Escape کردن کاراکترهای خاص MarkdownV2
+    کاراکترهای خاص: _ * [ ] ( ) ~ ` > # + - = | { } . !
+    """
+    escape_chars = r'_*[]()~`>#+-=|{}.!'
+    return re.sub(r'([{}])'.format(re.escape(escape_chars)), r'\\\1', text)
