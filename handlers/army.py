@@ -1,6 +1,6 @@
 # handlers/army.py
 # ============================================
-# سیستم مدیریت ارتش
+# سیستم مدیریت ارتش (HTML)
 # ============================================
 
 import logging
@@ -18,18 +18,17 @@ from utils.messages import (
     get_army_cooldown_message,
     get_army_keyboard
 )
-from utils.helpers import escape_markdown
 from config import Config
 
 logger = logging.getLogger(__name__)
 
 async def reply(update: Update, text: str):
-    """ارسال پیام با MarkdownV2 و Escape خودکار"""
-    await update.message.reply_text(escape_markdown(text), parse_mode="MarkdownV2")
+    """ارسال پیام با HTML"""
+    await update.message.reply_text(text, parse_mode="HTML")
 
 async def reply_callback(query, text: str):
-    """ویرایش پیام با MarkdownV2 و Escape خودکار"""
-    await query.edit_message_text(escape_markdown(text), parse_mode="MarkdownV2")
+    """ویرایش پیام با HTML"""
+    await query.edit_message_text(text, parse_mode="HTML")
 
 # ============================================
 # ۱. انتخاب ارتش
@@ -44,7 +43,7 @@ async def chosearmy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session.close()
     
     if not user:
-        await reply(update, "❌ **اول ثبت‌نام کن!**\nبا `/register` شروع کن.")
+        await reply(update, "❌ <b>اول ثبت‌نام کن!</b>\nبا /register شروع کن.")
         return
     
     if user.army and user.army_join_time:
@@ -57,9 +56,9 @@ async def chosearmy(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
     
     await update.message.reply_text(
-        escape_markdown(get_army_selection_message()),
+        get_army_selection_message(),
         reply_markup=InlineKeyboardMarkup(get_army_keyboard()),
-        parse_mode="MarkdownV2"
+        parse_mode="HTML"
     )
 
 # ============================================
@@ -76,7 +75,7 @@ async def army_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info(f"🔵 army_callback called for user {user_id} with army {army_key}")
     
     if army_key not in ARMIES:
-        await reply_callback(query, "❌ **ارتش نامعتبر!**\nلطفاً دوباره با `/chosearmy` تلاش کن.")
+        await reply_callback(query, "❌ <b>ارتش نامعتبر!</b>\nلطفاً دوباره با /chosearmy تلاش کن.")
         return
     
     session = get_session()
@@ -84,7 +83,7 @@ async def army_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if not user:
         session.close()
-        await reply_callback(query, "❌ **اول ثبت‌نام کن!**\nبا `/register` شروع کن.")
+        await reply_callback(query, "❌ <b>اول ثبت‌نام کن!</b>\nبا /register شروع کن.")
         return
     
     if user.army and user.army_join_time:
@@ -117,11 +116,11 @@ async def leavearmy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session.close()
     
     if not user:
-        await reply(update, "❌ **اول ثبت‌نام کن!**\nبا `/register` شروع کن.")
+        await reply(update, "❌ <b>اول ثبت‌نام کن!</b>\nبا /register شروع کن.")
         return
     
     if not user.army:
-        await reply(update, "❌ **تو عضو هیچ ارتشی نیستی!**\nبا `/chosearmy` به یک ارتش بپیوند.")
+        await reply(update, "❌ <b>تو عضو هیچ ارتشی نیستی!</b>\nبا /chosearmy به یک ارتش بپیوند.")
         return
     
     if user.army_join_time:
