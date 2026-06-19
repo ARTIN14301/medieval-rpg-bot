@@ -18,15 +18,18 @@ from utils.messages import (
     get_army_cooldown_message,
     get_army_keyboard
 )
+from utils.helpers import escape_markdown
 from config import Config
 
 logger = logging.getLogger(__name__)
 
 async def reply(update: Update, text: str):
-    await update.message.reply_text(text, parse_mode="MarkdownV2")
+    """ارسال پیام با MarkdownV2 و Escape خودکار"""
+    await update.message.reply_text(escape_markdown(text), parse_mode="MarkdownV2")
 
 async def reply_callback(query, text: str):
-    await query.edit_message_text(text, parse_mode="MarkdownV2")
+    """ویرایش پیام با MarkdownV2 و Escape خودکار"""
+    await query.edit_message_text(escape_markdown(text), parse_mode="MarkdownV2")
 
 # ============================================
 # ۱. انتخاب ارتش
@@ -54,7 +57,7 @@ async def chosearmy(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
     
     await update.message.reply_text(
-        get_army_selection_message(),
+        escape_markdown(get_army_selection_message()),
         reply_markup=InlineKeyboardMarkup(get_army_keyboard()),
         parse_mode="MarkdownV2"
     )
@@ -127,7 +130,7 @@ async def leavearmy(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if time_passed < cooldown_hours:
             remaining = cooldown_hours - time_passed
-            await reply(update, f"⏳ **صبر کن!**\n\nتازه به ارتش پیوستی!\n⏱️ **{remaining:.1f} ساعت** دیگه می‌تونی خارج شی.\n\n🛡️ فعلاً با هم‌رزمانت بجنگ!")
+            await reply(update, get_army_cooldown_message(remaining))
             return
     
     session = get_session()
