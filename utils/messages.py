@@ -117,3 +117,111 @@ def get_army_keyboard():
             )
         ])
     return keyboard
+
+
+
+# ============================================
+# پیام پروفایل
+# ============================================
+
+def get_profile_message(user):
+    """
+    ساخت پیام پروفایل کاربر
+    """
+    # اطلاعات کلاس
+    cls = CLASSES.get(user.class_name, {})
+    class_name = cls.get("name", "نامشخص")
+    class_emoji = cls.get("emoji", "❓")
+    
+    # اطلاعات ارتش
+    army_name = "ندارد"
+    army_emoji = ""
+    army_bonus = 0
+    if user.army:
+        army = ARMIES.get(user.army, {})
+        army_name = army.get("name", "نامشخص")
+        army_emoji = army.get("emoji", "")
+        army_bonus = army.get("bonus", 0)
+    
+    # محاسبه قدرت کل
+    from utils.helpers import get_user_power
+    power = get_user_power(user)
+    
+    # ساخت پیام
+    text = (
+        f"📜 <b>کارت شناسایی {user.username}</b> 📜\n\n"
+        f"┌─────────────────────────────┐\n"
+        f"│ 🎭 <b>کلاس:</b> {class_emoji} {class_name}\n"
+        f"│ 🌟 <b>لول:</b> {user.level}\n"
+        f"│ 🏅 <b>لقب:</b> {user.title}\n"
+        f"│ 💰 <b>طلا:</b> {user.gold:,}\n"
+        f"│ ⚔️ <b>قدرت:</b> {power}\n"
+        f"│ 🏆 <b>برد:</b> {user.wins}\n"
+        f"│ 💀 <b>باخت:</b> {user.losses}\n"
+    )
+    
+    # ارتش
+    if user.army:
+        text += f"│ ⚔️ <b>ارتش:</b> {army_emoji} {army_name} (+{army_bonus}%)\n"
+    else:
+        text += f"│ ⚔️ <b>ارتش:</b> {army_name}\n"
+    
+    # تجهیزات
+    from utils.constants import ITEMS
+    
+    weapon_name = "ندارد"
+    weapon_effect = 0
+    if user.current_weapon:
+        item = ITEMS.get(user.current_weapon, {})
+        weapon_name = item.get("name", "نامشخص")
+        weapon_effect = item.get("effect", 0)
+    text += f"│ 🗡️ <b>سلاح:</b> {weapon_name}"
+    if weapon_effect > 0:
+        text += f" (+{weapon_effect}%)"
+    text += "\n"
+    
+    armor_name = "ندارد"
+    armor_effect = 0
+    if user.current_armor:
+        item = ITEMS.get(user.current_armor, {})
+        armor_name = item.get("name", "نامشخص")
+        armor_effect = item.get("effect", 0)
+    text += f"│ 🛡️ <b>زره:</b> {armor_name}"
+    if armor_effect > 0:
+        text += f" (+{armor_effect}%)"
+    text += "\n"
+    
+    horse_name = "ندارد"
+    horse_effect = 0
+    if user.current_horse:
+        item = ITEMS.get(user.current_horse, {})
+        horse_name = item.get("name", "نامشخص")
+        horse_effect = item.get("effect", 0)
+    text += f"│ 🐎 <b>اسب:</b> {horse_name}"
+    if horse_effect > 0:
+        text += f" (+{horse_effect}%)"
+    text += "\n"
+    
+    text += "└─────────────────────────────┘\n\n"
+    
+    # نوار پیشرفت
+    exp_percent = int((user.exp / user.exp_needed) * 100) if user.exp_needed > 0 else 0
+    exp_bar = "█" * (exp_percent // 5) + "░" * (20 - (exp_percent // 5))
+    
+    text += (
+        f"📊 <b>پیشرفت:</b>\n"
+        f"┌─────────────────────────────┐\n"
+        f"│ {exp_bar}\n"
+        f"│ {user.exp} / {user.exp_needed} تجربه\n"
+        f"└─────────────────────────────┘\n\n"
+    )
+    
+    # راهنما
+    text += (
+        f"🛣️ <b>راه‌های پیشرفت:</b>\n"
+        f"🔹 با /solofight به جنگ برو\n"
+        f"🔹 با /shop تجهیزات بخر\n"
+        f"🔹 با /daily کوئست بگیر"
+    )
+    
+    return text
