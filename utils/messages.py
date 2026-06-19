@@ -120,3 +120,64 @@ def get_army_join_success(army_key):
         f"🔹 با `/solofight` وارد نبرد شو\n"
         f"🔹 با `/profile` پروفایل خود را ببین"
     )
+
+# ============================================
+# پیام‌های مربوط به ارتش
+# ============================================
+
+def get_army_selection_message():
+    """پیام انتخاب ارتش با طراحی حرفه‌ای"""
+    return (
+        "⚔️🛡️ **گام سوم: انتخاب ارتش** 🛡️⚔️\n\n"
+        "هر ارتش قدرت و تاریخ خاص خودش رو داره.\n"
+        "انتخاب تو تعیین می‌کنه که در کدام جبهه بجنگی!\n\n"
+        "🟡 **امپراتوری بیزانس** | 🛡️ دفاع +۸%\n"
+        "🔴 **امپراتوری مقدس روم** | ⚔️ قدرت +۷%\n"
+        "🟢 **شاهنشاهی ایران** | 🦁 سرعت +۵%\n"
+        "🟣 **ایلخانان مغول** | 🏹 قدرت +۱۰%\n\n"
+        "🗡️ لطفاً ارتش خود را انتخاب کن:"
+    )
+
+def get_army_join_success_message(army_key):
+    """پیام پیوستن موفق به ارتش"""
+    from utils.constants import ARMIES
+    army = ARMIES[army_key]
+    return (
+        f"✅⚔️ **به ارتش {army['name']} پیوستی!** ⚔️✅\n\n"
+        f"{army['emoji']} **بونوس:** +{army['bonus']}% قدرت\n\n"
+        f"🛡️ حالا آماده‌ای تا در کنار هم‌رزمانت بجنگی!\n"
+        f"🔹 با `/solofight` وارد نبرد شو\n"
+        f"🔹 با `/profile` پروفایل خود را ببین"
+    )
+
+def get_army_leave_success_message():
+    """پیام خروج از ارتش"""
+    return (
+        "❌⚔️ **تو از ارتش خارج شدی!** ⚔️❌\n\n"
+        "🛡️ حالا بدون ارتش هستی.\n"
+        "🔹 با `/chosearmy` می‌تونی دوباره به یک ارتش بپیوندی."
+    )
+
+def get_army_cooldown_message(hours):
+    """پیام کول‌داون تغییر ارتش"""
+    return (
+        f"⏳ **صبر کن!**\n\n"
+        f"تازه ارتش رو عوض کردی!\n"
+        f"⏱️ **{hours:.1f} ساعت** دیگه می‌تونی دوباره عوض کنی.\n\n"
+        f"🛡️ فعلاً با هم‌رزمانت بجنگ!"
+    )
+
+def get_army_keyboard():
+    """دکمه‌های رنگی انتخاب ارتش"""
+    from telegram import InlineKeyboardButton
+    from utils.constants import ARMIES
+    
+    keyboard = []
+    for key, army in ARMIES.items():
+        keyboard.append([
+            InlineKeyboardButton(
+                f"{army['emoji']} {army['name']}",
+                callback_data=f"army_{key}"
+            )
+        ])
+    return keyboard
