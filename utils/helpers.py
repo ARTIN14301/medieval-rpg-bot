@@ -98,3 +98,39 @@ def escape_markdown(text: str) -> str:
         text = text.replace(char, f'\\{char}')
     
     return text
+
+
+def get_user_power(user):
+    """
+    محاسبه قدرت کل کاربر
+    """
+    from utils.constants import CLASSES, ARMIES, ITEMS
+    
+    power = 0
+    
+    # قدرت پایه از لول (هر لول ۲ قدرت)
+    power += user.level * 2
+    
+    # بونوس کلاس
+    cls = CLASSES.get(user.class_name, {})
+    power += cls.get("bonus", {}).get("power", 0)
+    
+    # بونوس ارتش
+    if user.army:
+        army = ARMIES.get(user.army, {})
+        power += army.get("bonus", 0)
+    
+    # تجهیزات
+    if user.current_weapon:
+        item = ITEMS.get(user.current_weapon, {})
+        power += item.get("effect", 0)
+    
+    if user.current_armor:
+        item = ITEMS.get(user.current_armor, {})
+        power += item.get("effect", 0)
+    
+    if user.current_horse:
+        item = ITEMS.get(user.current_horse, {})
+        power += item.get("effect", 0)
+    
+    return power
