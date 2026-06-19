@@ -12,12 +12,11 @@ from telegram.ext import ContextTypes
 from database.db import get_session
 from database.schema import User, FightHistory
 from utils.constants import get_title
-from utils.helpers import get_user_power, get_user_speed, get_user_defense
+from utils.helpers import get_user_power, get_user_speed
 from config import Config
 
 logger = logging.getLogger(__name__)
 
-# دیکشنری برای پنل‌های فعال
 active_panels = {}
 
 # ============================================
@@ -40,7 +39,7 @@ async def solofight(update: Update, context: ContextTypes.DEFAULT_TYPE):
         session.close()
         return
     
-    # چک کردن بلاک بعد از باخت (۳۰ دقیقه)
+    # ===== چک کردن بلاک بعد از باخت (۳۰ دقیقه) =====
     last_fight = session.query(FightHistory).filter_by(
         user_id=user.id, result="lose"
     ).order_by(FightHistory.timestamp.desc()).first()
@@ -267,7 +266,7 @@ async def fight_level_callback(update: Update, context: ContextTypes.DEFAULT_TYP
     # ===== محاسبه قدرت =====
     user_power = get_user_power(user)
     
-    # قدرت دشمن بر اساس لول و نوع جنگ (بالانس شده)
+    # قدرت دشمن بر اساس نوع جنگ و سطح (بالانس شده)
     base_power = {
         "village": 10,
         "army": 20,
