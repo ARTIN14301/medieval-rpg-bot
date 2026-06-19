@@ -1,6 +1,6 @@
 # handlers/register.py
 # ============================================
-# سیستم ثبت‌نام کامل با طراحی حرفه‌ای
+# سیستم ثبت‌نام کامل با طراحی حرفه‌ای (HTML)
 # ============================================
 
 import logging
@@ -16,7 +16,6 @@ from utils.messages import (
     get_register_success_message,
     get_class_keyboard
 )
-from utils.helpers import escape_markdown
 from config import Config
 
 logger = logging.getLogger(__name__)
@@ -24,12 +23,12 @@ logger = logging.getLogger(__name__)
 waiting_for_name = {}
 
 async def reply(update: Update, text: str):
-    """ارسال پیام با MarkdownV2 و Escape خودکار"""
-    await update.message.reply_text(escape_markdown(text), parse_mode="MarkdownV2")
+    """ارسال پیام با HTML"""
+    await update.message.reply_text(text, parse_mode="HTML")
 
 async def reply_callback(query, text: str):
-    """ویرایش پیام با MarkdownV2 و Escape خودکار"""
-    await query.edit_message_text(escape_markdown(text), parse_mode="MarkdownV2")
+    """ویرایش پیام با HTML"""
+    await query.edit_message_text(text, parse_mode="HTML")
 
 # ============================================
 # ۱. شروع ثبت‌نام
@@ -44,7 +43,7 @@ async def register_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session.close()
     
     if existing:
-        await reply(update, f"❌ شما قبلاً با اسم `{existing.username}` ثبت‌نام کردی!\nبرای مشاهده پروفایل از `/profile` استفاده کن.")
+        await reply(update, f"❌ شما قبلاً با اسم <code>{existing.username}</code> ثبت‌نام کردی!\nبرای مشاهده پروفایل از /profile استفاده کن.")
         return
     
     waiting_for_name[user_id] = True
@@ -64,15 +63,15 @@ async def handle_name_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = update.message.text.strip()
     
     if len(name) > 15:
-        await reply(update, "❌ **اسم خیلی بلند است!**\nحداکثر ۱۵ حرف مجاز است.\n\n✏️ لطفاً دوباره تلاش کن:")
+        await reply(update, "❌ <b>اسم خیلی بلند است!</b>\nحداکثر ۱۵ حرف مجاز است.\n\n✏️ لطفاً دوباره تلاش کن:")
         return
     
     if " " in name:
-        await reply(update, "❌ **اسم نباید فاصله داشته باشد!**\nاز «_» برای جدا کردن کلمات استفاده کن.\n\n✏️ لطفاً دوباره تلاش کن:")
+        await reply(update, "❌ <b>اسم نباید فاصله داشته باشد!</b>\nاز «_» برای جدا کردن کلمات استفاده کن.\n\n✏️ لطفاً دوباره تلاش کن:")
         return
     
     if not name.replace("_", "").isalnum():
-        await reply(update, "❌ **اسم نامعتبر است!**\nفقط حروف انگلیسی، اعداد و «_» مجاز است.\n\n✏️ لطفاً دوباره تلاش کن:")
+        await reply(update, "❌ <b>اسم نامعتبر است!</b>\nفقط حروف انگلیسی، اعداد و «_» مجاز است.\n\n✏️ لطفاً دوباره تلاش کن:")
         return
     
     session = get_session()
@@ -80,16 +79,16 @@ async def handle_name_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session.close()
     
     if existing:
-        await reply(update, f"❌ **اسم `{name}` قبلاً استفاده شده!**\nیک اسم دیگر انتخاب کن.\n\n✏️ لطفاً دوباره تلاش کن:")
+        await reply(update, f"❌ <b>اسم <code>{name}</code> قبلاً استفاده شده!</b>\nیک اسم دیگر انتخاب کن.\n\n✏️ لطفاً دوباره تلاش کن:")
         return
     
     context.user_data['temp_username'] = name
     del waiting_for_name[user_id]
     
     await update.message.reply_text(
-        escape_markdown(get_register_class_message()),
+        get_register_class_message(),
         reply_markup=InlineKeyboardMarkup(get_class_keyboard()),
-        parse_mode="MarkdownV2"
+        parse_mode="HTML"
     )
 
 # ============================================
@@ -106,19 +105,19 @@ async def class_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info(f"🔵 class_callback called for user {user_id} with class {class_key}")
     
     if class_key not in CLASSES:
-        await reply_callback(query, "❌ **کلاس نامعتبر!**\nلطفاً با `/register` دوباره شروع کن.")
+        await reply_callback(query, "❌ <b>کلاس نامعتبر!</b>\nلطفاً با /register دوباره شروع کن.")
         return
     
     temp_username = context.user_data.get('temp_username')
     if not temp_username:
-        await reply_callback(query, "❌ **خطا!**\nلطفاً با `/register` دوباره شروع کن.")
+        await reply_callback(query, "❌ <b>خطا!</b>\nلطفاً با /register دوباره شروع کن.")
         return
     
     session = get_session()
     existing = session.query(User).filter_by(username=temp_username).first()
     if existing:
         session.close()
-        await reply_callback(query, f"❌ **اسم `{temp_username}` بین مراحل ثبت‌نام گرفته شد!**\nلطفاً با `/register` دوباره شروع کن.")
+        await reply_callback(query, f"❌ <b>اسم <code>{temp_username}</code> بین مراحل ثبت‌نام گرفته شد!</b>\nلطفاً با /register دوباره شروع کن.")
         return
     
     try:
@@ -149,7 +148,7 @@ async def class_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         session.rollback()
         session.close()
         logger.error(f"❌ Error registering user: {e}")
-        await reply_callback(query, "❌ **خطا در ثبت‌نام!**\nلطفاً دوباره با `/register` تلاش کن.")
+        await reply_callback(query, "❌ <b>خطا در ثبت‌نام!</b>\nلطفاً دوباره با /register تلاش کن.")
 
 # ============================================
 # ۴. لغو ثبت‌نام
@@ -164,4 +163,4 @@ async def cancel_register(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if 'temp_username' in context.user_data:
         context.user_data.pop('temp_username')
     
-    await reply(update, "❌ **ثبت‌نام لغو شد.**\n\nهر وقت آماده بودی، با `/register` دوباره شروع کن.\n⏳ منتظرت هستیم!")
+    await reply(update, "❌ <b>ثبت‌نام لغو شد.</b>\n\nهر وقت آماده بودی، با /register دوباره شروع کن.\n⏳ منتظرت هستیم!")
