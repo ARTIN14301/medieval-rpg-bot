@@ -4,18 +4,14 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 from config import Config
 from database.db import init_database
 from handlers.register import register_start, handle_name_input, class_callback
+from utils.messages import get_start_message
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "⚔️ **به دنیای Medieval خوش آمدی!** ⚔️\n\n"
-        "📋 **برای شروع:**\n"
-        "• /register - ثبت‌نام در بازی\n"
-        "• /profile - مشاهده پروفایل\n"
-        "• /chosearmy - انتخاب ارتش"
-    )
+    await update.message.reply_text(get_start_message())
 
 async def farsi_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip()
