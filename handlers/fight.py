@@ -5,14 +5,13 @@
 
 import logging
 import random
-from datetime import datetime, timedelta
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
 from database.db import get_session
 from database.schema import User
 from utils.constants import get_title
-from utils.helpers import get_user_power, get_user_speed, get_user_defense, calculate_cooldown
+from utils.helpers import get_user_power, get_user_speed
 from config import Config
 
 logger = logging.getLogger(__name__)
@@ -68,7 +67,7 @@ async def solofight(update: Update, context: ContextTypes.DEFAULT_TYPE):
     active_panels[user_id] = msg.message_id
 
 # ============================================
-# ۲. کالبک‌های جنگ
+# ۲. کالبک‌های جنگ - دسته‌بندی
 # ============================================
 
 async def fight_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -87,7 +86,6 @@ async def fight_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # برگشت به پنل اصلی
     if action == "fight_back":
-        # دوباره پنل اصلی رو نشون بده
         session = get_session()
         user = session.query(User).filter_by(telegram_id=user_id).first()
         session.close()
@@ -128,14 +126,18 @@ async def fight_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("❌ **این پنل منقضی شده!**", parse_mode="HTML")
         return
     
-    # استخراج نوع جنگ
+    # اگر کالبک با `fight_level_` شروع شد، بفرست به تابع سطح
+    if action.startswith("fight_level_"):
+        await fight_level_callback(update, context)
+        return
+    
+    # استخراج نوع جنگ (فقط برای fight_village, fight_army, fight_monster)
     fight_type = action.replace("fight_", "")
     
     # نمایش سطوح
     rewards = Config.FIGHT_REWARDS.get(fight_type, {})
     if not rewards:
         await query.edit_message_text(f"❌ **نوع جنگ `{fight_type}` نامعتبر!**", parse_mode="HTML")
-        # پنل رو پاک نکن، فقط خطا نشون بده
         return
     
     keyboard = []
@@ -155,7 +157,7 @@ async def fight_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 # ============================================
-# ۳. شروع جنگ
+# ۳. شروع جنگ (پردازش سطح انتخاب شده)
 # ============================================
 
 async def fight_level_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -168,11 +170,17 @@ async def fight_level_callback(update: Update, context: ContextTypes.DEFAULT_TYP
         await query.edit_message_text("❌ **پنل منقضی شده!**", parse_mode="HTML")
         return
     
-    try:
-        _, fight_type, level = query.data.split("_")
-        level = int(level)
-    except ValueError:
+    # استخراج اطلاعات از کالبک (مثلاً fight_level_village_1)
+    parts = query.data.split("_")
+    if len(parts) != 4:
         await query.edit_message_text("❌ **خطا در دریافت اطلاعات!**", parse_mode="HTML")
+        return
+    
+    fight_type = parts[2]  # village, army, monster
+    try:
+        level = int(parts[3])
+    except ValueError:
+        await query.edit_message_text("❌ **سطح نامعتبر!**", parse_mode="HTML")
         return
     
     session = get_session()
