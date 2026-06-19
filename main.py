@@ -12,6 +12,7 @@ from database.db import init_database
 from handlers.register import register_start, handle_name_input, class_callback, cancel_register
 from handlers.army import chosearmy, army_callback, leavearmy
 from utils.messages import get_start_message
+from handlers.profile import profile
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -46,7 +47,9 @@ async def farsi_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await chosearmy(update, context)
     elif text == "خروج":
         await leavearmy(update, context)
-
+    elif text == "پروفایل":
+    await profile(update, context)
+    
 # ============================================
 # اجرا
 # ============================================
@@ -61,7 +64,7 @@ def main():
     app.add_handler(CommandHandler("cancel", cancel_register))
     app.add_handler(CommandHandler("chosearmy", chosearmy))
     app.add_handler(CommandHandler("leavearmy", leavearmy))
-    
+    app.add_handler(CommandHandler("profile", profile))
     app.add_handler(CallbackQueryHandler(class_callback, pattern="^class_"))
     app.add_handler(CallbackQueryHandler(army_callback, pattern="^army_"))
     
