@@ -6,7 +6,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from config import Config
-from database.schema import Base,
+from database.schema import Base
 
 # ایجاد engine
 engine = create_engine(Config.DATABASE_URL)
