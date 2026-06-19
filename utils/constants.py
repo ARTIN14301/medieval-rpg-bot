@@ -11,22 +11,22 @@ CLASSES = {
     "warrior": {
         "name": "جنگجو",
         "emoji": "⚔️",
-        "bonus": {"power": 20, "gold": 0, "escape": 0, "defense": 0}
+        "bonus": {"power": 20, "gold": 0, "speed": 0, "defense": 0}
     },
     "archer": {
         "name": "کماندار",
         "emoji": "🏹",
-        "bonus": {"power": 15, "gold": 0, "escape": 10, "defense": 0}
+        "bonus": {"power": 15, "gold": 0, "speed": 10, "defense": 0}
     },
     "defender": {
         "name": "مدافع",
         "emoji": "🛡️",
-        "bonus": {"power": 0, "gold": 0, "escape": 0, "defense": 20}
+        "bonus": {"power": 0, "gold": 0, "speed": 0, "defense": 20}
     },
     "assassin": {
         "name": "آسـاسین",
         "emoji": "🗡️",
-        "bonus": {"power": 5, "gold": 15, "escape": 0, "defense": 0}
+        "bonus": {"power": 5, "gold": 15, "speed": 0, "defense": 0}
     }
 }
 
@@ -36,24 +36,24 @@ CLASSES = {
 
 ARMIES = {
     "byzantine": {
-        "name": "امپراتوری بیزانس",
+        "name": "بیزانس",
         "emoji": "🛡️",
-        "bonus": 8
+        "bonus": {"power": 8, "speed": 0, "defense": 5}
     },
     "holy_roman": {
-        "name": "امپراتوری مقدس روم",
+        "name": "روم مقدس",
         "emoji": "⚔️",
-        "bonus": 7
+        "bonus": {"power": 7, "speed": 0, "defense": 3}
     },
     "persian": {
-        "name": "شاهنشاهی ایران",
+        "name": "ایران",
         "emoji": "🦁",
-        "bonus": 5
+        "bonus": {"power": 5, "speed": 5, "defense": 0}
     },
     "mongol": {
-        "name": "ایلخانان مغول",
+        "name": "مغول",
         "emoji": "🏹",
-        "bonus": 10
+        "bonus": {"power": 10, "speed": 10, "defense": 0}
     }
 }
 
@@ -65,11 +65,11 @@ TITLES = {
     1: "کهنه‌سرباز",
     3: "دلاور",
     5: "پهلوان",
-    7: "شمشیرزن ماهر",
-    9: "سردار جنگ",
-    11: "فاتح روستاها",
+    7: "شمشیرزن",
+    9: "سردار",
+    11: "فاتح",
     13: "نجیب‌زاده",
-    15: "فرمانده",  # 🔥 شروع بازی اصلی
+    15: "فرمانده",
     17: "والی",
     19: "فئودال",
     21: "بارون",
@@ -115,71 +115,60 @@ TITLES = {
 }
 
 def get_title(level):
-    """دریافت لقب بر اساس لول"""
     if level < 1:
         return TITLES[1]
     if level > 99:
         return TITLES[99]
-    # پیدا کردن نزدیک‌ترین لول فرد پایین‌تر
     closest = level if level % 2 == 1 else level - 1
     if closest < 1:
         closest = 1
     return TITLES.get(closest, TITLES[1])
 
 # ============================================
-# ۴. آیتم‌های شاپ
+# ۴. آیتم‌های شاپ (۱۵ سلاح، ۱۵ زره، ۵ اسب)
 # ============================================
 
 ITEMS = {
-    # ===== سلاح‌ها =====
-    "dagger": {"name": "خنجر کهنه", "type": "weapon", "price": 1000, "effect": 2},
-    "short_sword": {"name": "شمشیر کوتاه", "type": "weapon", "price": 2000, "effect": 3},
-    "iron_sword": {"name": "شمشیر آهنی", "type": "weapon", "price": 3500, "effect": 4},
-    "steel_sword": {"name": "شمشیر فولادی", "type": "weapon", "price": 5000, "effect": 5},
-    "crimson_blade": {"name": "تیغ زرشکی", "type": "weapon", "price": 10000, "effect": 7},
-    "shadow_fang": {"name": "نیش سایه", "type": "weapon", "price": 15000, "effect": 9},
-    "dragon_claw": {"name": "چنگال اژدها", "type": "weapon", "price": 20000, "effect": 11},
-    "thunder_bringer": {"name": "آورنده رعد", "type": "weapon", "price": 30000, "effect": 13},
-    "frost_mourne": {"name": "سوگ یخبندان", "type": "weapon", "price": 50000, "effect": 16},
-    "hell_fire": {"name": "آتش دوزخی", "type": "weapon", "price": 65000, "effect": 19},
-    "star_breaker": {"name": "ستاره‌شکن", "type": "weapon", "price": 80000, "effect": 22},
-    "void_edge": {"name": "لبه خلأ", "type": "weapon", "price": 100000, "effect": 25},
-    "soul_reaper": {"name": "دروگر ارواح", "type": "weapon", "price": 150000, "effect": 30},
-    "god_slayer": {"name": "خداکش", "type": "weapon", "price": 200000, "effect": 35},
-    "world_ender": {"name": "پایان جهان", "type": "weapon", "price": 300000, "effect": 40},
-    "apocalypse": {"name": "آخرالزمان", "type": "weapon", "price": 500000, "effect": 46},
-    "eternity": {"name": "جاودانگی", "type": "weapon", "price": 700000, "effect": 52},
-    "primordial": {"name": "نخستین", "type": "weapon", "price": 850000, "effect": 58},
-    "infinity": {"name": "بی‌نهایت", "type": "weapon", "price": 1000000, "effect": 65},
+    # ===== سلاح‌ها (۱۵ عدد) =====
+    "wooden_sword": {"name": "🪵 شمشیر چوبی", "type": "weapon", "price": 500, "power": 1, "speed": 0, "defense": 0},
+    "stone_axe": {"name": "🪨 تبر سنگی", "type": "weapon", "price": 1000, "power": 2, "speed": 0, "defense": 0},
+    "iron_dagger": {"name": "🔪 خنجر آهنی", "type": "weapon", "price": 2000, "power": 3, "speed": 0, "defense": 0},
+    "bronze_sword": {"name": "⚔️ شمشیر برنزی", "type": "weapon", "price": 3500, "power": 4, "speed": 0, "defense": 0},
+    "steel_sword": {"name": "🗡️ شمشیر فولادی", "type": "weapon", "price": 5000, "power": 5, "speed": 0, "defense": 0},
+    "crimson_blade": {"name": "🔴 تیغ زرشکی", "type": "weapon", "price": 10000, "power": 7, "speed": 0, "defense": 0},
+    "shadow_dagger": {"name": "🌑 خنجر سایه", "type": "weapon", "price": 15000, "power": 9, "speed": 0, "defense": 0},
+    "dragon_claw": {"name": "🐉 چنگال اژدها", "type": "weapon", "price": 20000, "power": 11, "speed": 0, "defense": 0},
+    "thunder_sword": {"name": "⚡ شمشیر رعد", "type": "weapon", "price": 30000, "power": 13, "speed": 0, "defense": 0},
+    "frost_blade": {"name": "❄️ تیغ یخی", "type": "weapon", "price": 50000, "power": 16, "speed": 0, "defense": 0},
+    "hell_sword": {"name": "🔥 شمشیر جهنم", "type": "weapon", "price": 65000, "power": 19, "speed": 0, "defense": 0},
+    "star_breaker": {"name": "⭐ ستاره‌شکن", "type": "weapon", "price": 80000, "power": 22, "speed": 0, "defense": 0},
+    "void_sword": {"name": "🌀 شمشیر خلأ", "type": "weapon", "price": 100000, "power": 25, "speed": 0, "defense": 0},
+    "soul_reaper": {"name": "💀 دروگر ارواح", "type": "weapon", "price": 150000, "power": 30, "speed": 0, "defense": 0},
+    "god_slayer": {"name": "✨ خداکش", "type": "weapon", "price": 200000, "power": 35, "speed": 0, "defense": 0},
     
-    # ===== زره‌ها =====
-    "leather_armor": {"name": "زره چرمی", "type": "armor", "price": 1000, "effect": 2},
-    "studded_armor": {"name": "زره میخی", "type": "armor", "price": 2000, "effect": 3},
-    "chainmail": {"name": "زره زنجیری", "type": "armor", "price": 3500, "effect": 4},
-    "iron_armor": {"name": "زره آهنی", "type": "armor", "price": 5000, "effect": 5},
-    "steel_armor": {"name": "زره فولادی", "type": "armor", "price": 10000, "effect": 7},
-    "golden_armor": {"name": "زره طلایی", "type": "armor", "price": 15000, "effect": 9},
-    "dragon_scale": {"name": "پولک اژدها", "type": "armor", "price": 20000, "effect": 11},
-    "dark_armor": {"name": "زره تاریکی", "type": "armor", "price": 30000, "effect": 13},
-    "phoenix_armor": {"name": "زره ققنوس", "type": "armor", "price": 50000, "effect": 16},
-    "titan_armor": {"name": "زره تیتان", "type": "armor", "price": 65000, "effect": 19},
-    "thunder_armor": {"name": "زره رعد", "type": "armor", "price": 80000, "effect": 22},
-    "holy_armor": {"name": "زره مقدس", "type": "armor", "price": 100000, "effect": 25},
-    "eternal_armor": {"name": "زره جاویدان", "type": "armor", "price": 150000, "effect": 30},
-    "god_armor": {"name": "زره خدایان", "type": "armor", "price": 200000, "effect": 35},
-    "celestial_armor": {"name": "زره آسمانی", "type": "armor", "price": 300000, "effect": 40},
-    "immortal": {"name": "جاودانگی", "type": "armor", "price": 500000, "effect": 46},
-    "void_armor": {"name": "زره خلأ", "type": "armor", "price": 700000, "effect": 52},
-    "creation": {"name": "آفرینش", "type": "armor", "price": 850000, "effect": 58},
-    "absolute": {"name": "مطلق", "type": "armor", "price": 1000000, "effect": 65},
+    # ===== زره‌ها (۱۵ عدد) =====
+    "leather_armor": {"name": "🟫 زره چرمی", "type": "armor", "price": 500, "power": 0, "speed": 0, "defense": 1},
+    "studded_armor": {"name": "🔘 زره میخی", "type": "armor", "price": 1000, "power": 0, "speed": 0, "defense": 2},
+    "chainmail": {"name": "⛓️ زره زنجیری", "type": "armor", "price": 2000, "power": 0, "speed": 0, "defense": 3},
+    "iron_armor": {"name": "🪨 زره آهنی", "type": "armor", "price": 3500, "power": 0, "speed": 0, "defense": 4},
+    "steel_armor": {"name": "🔩 زره فولادی", "type": "armor", "price": 5000, "power": 0, "speed": 0, "defense": 5},
+    "bronze_armor": {"name": "🟡 زره برنزی", "type": "armor", "price": 10000, "power": 0, "speed": 0, "defense": 7},
+    "golden_armor": {"name": "🟠 زره طلایی", "type": "armor", "price": 15000, "power": 0, "speed": 0, "defense": 9},
+    "dragon_scale": {"name": "🐉 پولک اژدها", "type": "armor", "price": 20000, "power": 0, "speed": 0, "defense": 11},
+    "shadow_armor": {"name": "🌑 زره سایه", "type": "armor", "price": 30000, "power": 0, "speed": 0, "defense": 13},
+    "phoenix_armor": {"name": "🔥 زره ققنوس", "type": "armor", "price": 50000, "power": 0, "speed": 0, "defense": 16},
+    "titan_armor": {"name": "⛰️ زره تیتان", "type": "armor", "price": 65000, "power": 0, "speed": 0, "defense": 19},
+    "thunder_armor": {"name": "⚡ زره رعد", "type": "armor", "price": 80000, "power": 0, "speed": 0, "defense": 22},
+    "holy_armor": {"name": "✨ زره مقدس", "type": "armor", "price": 100000, "power": 0, "speed": 0, "defense": 25},
+    "eternal_armor": {"name": "♾️ زره جاویدان", "type": "armor", "price": 150000, "power": 0, "speed": 0, "defense": 30},
+    "celestial_armor": {"name": "🌌 زره آسمانی", "type": "armor", "price": 200000, "power": 0, "speed": 0, "defense": 35},
     
-    # ===== اسب‌ها =====
-    "pony": {"name": "کره اسب", "type": "horse", "price": 10000, "effect": 5},
-    "war_horse": {"name": "اسب جنگی", "type": "horse", "price": 30000, "effect": 10},
-    "nightmare": {"name": "کابوس", "type": "horse", "price": 80000, "effect": 18},
-    "pegasus": {"name": "پگاسوس", "type": "horse", "price": 150000, "effect": 28},
-    "shadow_stallion": {"name": "اسب نریان سایه", "type": "horse", "price": 300000, "effect": 40},
-    "celestial_horse": {"name": "اسب آسمانی", "type": "horse", "price": 500000, "effect": 55},
+    # ===== اسب‌ها (۵ عدد) =====
+    "pony": {"name": "🐴 کره اسب", "type": "horse", "price": 10000, "power": 2, "speed": 2, "defense": 0},
+    "war_horse": {"name": "🐎 اسب جنگی", "type": "horse", "price": 30000, "power": 5, "speed": 5, "defense": 0},
+    "nightmare": {"name": "🌙 کابوس", "type": "horse", "price": 80000, "power": 9, "speed": 8, "defense": 0},
+    "pegasus": {"name": "🦄 پگاسوس", "type": "horse", "price": 150000, "power": 14, "speed": 12, "defense": 0},
+    "celestial_horse": {"name": "🌠 اسب آسمانی", "type": "horse", "price": 300000, "power": 20, "speed": 18, "defense": 0},
 }
 
 # ============================================
