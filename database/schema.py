@@ -129,6 +129,34 @@ class Duel(Base):
     winner = relationship("User", foreign_keys=[winner_id])
 
 
+# database/schema.py (بخش جدید)
+
+class FightHistory(Base):
+    __tablename__ = "fight_history"
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    fight_type = Column(String(20))   # village, army, monster
+    fight_level = Column(Integer)
+    result = Column(String(10))       # win, lose
+    gold_reward = Column(Integer, default=0)
+    exp_reward = Column(Integer, default=0)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+class ActiveFight(Base):
+    __tablename__ = "active_fights"
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True)
+    fight_type = Column(String(20))
+    fight_level = Column(Integer)
+    start_time = Column(DateTime, default=datetime.utcnow)
+    status = Column(String(20), default="active")  # active, finished
+    message_id = Column(Integer, nullable=True)    # برای بستن خودکار پنل
+
+
+
+
 # ============================================
 # تابع ایجاد جداول
 # ============================================
